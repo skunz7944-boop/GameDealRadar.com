@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Deal Radar - Top Deals</title>
+    <title>Game Deal Radar - Key-Vergleich</title>
     <style>
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
@@ -22,124 +22,94 @@
         h1 {
             font-size: 2.5rem;
             color: #38bdf8;
-            text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
             margin-bottom: 5px;
         }
-        .subtitle {
-            color: #94a3b8;
-            font-size: 1rem;
-        }
-        .results-list {
+        .search-box {
             width: 100%;
-            max-width: 550px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            max-width: 500px;
+            margin-bottom: 25px;
         }
-        .deal-card {
-            background-color: #1e293b;
+        input {
+            width: 100%;
             padding: 15px;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid #334155;
+            border: 1px solid #1e293b;
+            background-color: #1e293b;
+            color: white;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+        }
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .shop-button {
+            padding: 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            color: white;
             transition: transform 0.2s;
         }
-        .deal-card:hover {
-            transform: scale(1.02);
-            border-color: #38bdf8;
+        .shop-button:hover {
+            transform: scale(1.05);
         }
-        .deal-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .game-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #f8fafc;
-        }
-        .savings-badge {
-            background-color: #ef4444;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            width: fit-content;
-        }
-        .price-container {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .retail-price {
-            text-decoration: line-through;
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-        .price-tag {
-            background-color: #22c55e;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
+        /* Farben für die jeweiligen Shops */
+        .eneba { background-color: #5d1f87; }
+        .instant { background-color: #ff5400; }
+        .mmoga { background-color: #31572c; }
+        .kinguin { background-color: #1a73e8; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>🎮 Game Deal Radar</h1>
-        <p class="subtitle">Die heißesten Gaming-Deals aktuell live im Netz</p>
+        <p>Tippe ein Spiel ein und vergleiche die Key-Shops</p>
     </div>
 
-    <div id="results" class="results-list">
-        <p style="text-align:center; color:#94a3b8;">Radar scannt den Markt nach Deals...</p>
+    <div class="search-box">
+        <input type="text" id="gameSearch" placeholder="Spielname eingeben (z.B. GTA)...">
+    </div>
+
+    <div class="shop-grid">
+        <button class="shop-button eneba" onclick="searchInShop('eneba')">Auf Eneba suchen</button>
+        <button class="shop-button instant" onclick="searchInShop('instant')">Auf Instant Gaming</button>
+        <button class="shop-button mmoga" onclick="searchInShop('mmoga')">Auf MMOGA suchen</button>
+        <button class="shop-button kinguin" onclick="searchInShop('kinguin')">Auf Kinguin suchen</button>
     </div>
 
     <script>
-        // Diese Funktion läuft AUTOMATISCH, sobald die Seite lädt
-        window.onload = async function() {
-            const resultsDiv = document.getElementById('results');
+        function searchInShop(shop) {
+            const query = encodeURIComponent(document.getElementById('gameSearch').value);
             
-            try {
-                // Holt automatisch die Top 10 Deals sortiert nach den besten Ersparnissen
-                const response = await fetch(`https://www.cheapshark.com/api/1.0/deals?pageSize=10&sortBy=Savings`);
-                const deals = await response.json();
-                
-                resultsDiv.innerHTML = '';
-                
-                if (deals.length === 0) {
-                    resultsDiv.innerHTML = '<p style="text-align:center; color:#94a3b8;">Gerade keine Deals verfügbar.</p>';
-                    return;
-                }
-                
-                deals.forEach(deal => {
-                    const card = document.createElement('div');
-                    card.className = 'deal-card';
-                    card.innerHTML = `
-                        <div class="deal-info">
-                            <span class="game-title">${deal.title}</span>
-                            <span class="savings-badge">-${Math.round(deal.savings)}%</span>
-                        </div>
-                        <div class="price-container">
-                            <span class="retail-price">$${deal.normalPrice}</span>
-                            <span class="price-tag">$${deal.salePrice}</span>
-                        </div>
-                    `;
-                    resultsDiv.appendChild(card);
-                });
-                
-            } catch (error) {
-                resultsDiv.innerHTML = '<p style="text-align:center; color:#ef4444;">Fehler beim automatischen Laden der Deals.</p>';
-                console.error(error);
+            if (!query) {
+                alert("Bitte gib zuerst einen Spielnamen ein!");
+                return;
             }
-        };
+
+            let url = "";
+
+            if (shop === 'eneba') {
+                url = `https://www.eneba.com/store/all?text=${query}`;
+            } else if (shop === 'instant') {
+                url = `https://www.instant-gaming.com/de/suche/?q=${query}`;
+            } else if (shop === 'mmoga') {
+                url = `https://www.mmoga.de/advanced_search_result.php?keywords=${query}`;
+            } else if (shop === 'kinguin') {
+                url = `https://www.kinguin.net/de/catalogsearch/result?q=${query}`;
+            }
+
+            // Öffnet die Suche des jeweiligen Shops in einem neuen Tab
+            window.open(url, '_blank');
+        }
     </script>
 </body>
-</html>
 
+</html>
