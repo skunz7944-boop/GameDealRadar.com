@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GamePriceHunt</title>
+    <style>
+        body { background: #0d1117; color: white; font-family: Arial; padding: 20px; }
+        .game { background: #161b22; padding: 15px; margin: 10px; border-radius: 10px; display: flex; gap: 15px; align-items: center; }
+        .best { color: #00ff00; font-weight: bold; font-size: 20px; }
+        .normal { color: #ff6b6b; text-decoration: line-through; }
+        input { padding: 10px; width: 250px; background: #21262d; color: white; border: 1px solid #30363d; border-radius: 5px; }
+        button { padding: 10px 20px; background: #238636; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        img { width: 80px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎮 GamePriceHunt</h1>
+    <p>Suche mit Abkürzungen: gta5, cod, csgo, mc, rdr2...</p>
+    <input type="text" id="search" placeholder="z.B. gta5 oder Minecraft">
+    <button onclick="suchen()">Suchen</button>
+    <div id="ergebnisse"></div>
+    <script>
+        async function suchen() {
+            let titel = document.getElementById("search").value;
+            document.getElementById("ergebnisse").innerHTML = "<p>Suche...</p>";
+            let r = await fetch(`/search?titel=${encodeURIComponent(titel)}`);
+            let data = await r.json();
+            let html = "";
+            for (let g of data) {
+                html += `<div class="game"><img src="${g.bild}"><div><h2>${g.name}</h2><p class="normal">Normal: ${g.normal_preis}€</p><p class="best">✅ Bester Preis: ${g.bester_preis}€</p><a href="https://www.cheapshark.com/redirect?dealID=${g.deal_id}" target="_blank"><button>Zum Deal</button></a></div></div>`;
+            }
+            document.getElementById("ergebnisse").innerHTML = html || "<p>Nichts gefunden</p>";
+        }
+    </script>
+</body>
+</html>
